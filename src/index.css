@@ -100,3 +100,14 @@ img {
 	width: 23rem;
 	padding: 1rem;
 }
+
+.mansoryimg {
+	padding: 0 !important;
+	height: 30rem !important;
+	width: 10rem !important;
+	filter: grayscale(1) brightness(0.3);
+}
+
+.mansoryimg:hover {
+	filter: grayscale(0) brightness(1);
+}

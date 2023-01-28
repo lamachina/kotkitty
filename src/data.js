@@ -76,6 +76,39 @@ const work = [
 		linkProject: 'https://testnets.opensea.io/fr/collection/kotka',
 		linkGithub: 'https://testnets.opensea.io/fr/collection/kotka',
 	},
+	{
+		name: 'Feles Nucleo',
+		description: 'Cras leo mauris, gravida vel lectus ac, congue luctus odio. Sed varius varius est eget convallis sagittis sit amet.',
+		url: '/images/kot_fluor.png',
+		stack: [
+			{ icon: iconb.BiCheckShield, name: 'Sekurity' },
+			{ icon: iconb.BiGasPump, name: 'Stacking' },
+		],
+		linkProject: 'https://testnets.opensea.io/fr/collection/kotka',
+		linkGithub: 'https://testnets.opensea.io/fr/collection/kotka',
+	},
+	{
+		name: 'Feles Aqua',
+		description: 'Cras leo mauris, gravida vel lectus ac, congue luctus odio. Sed varius varius est eget convallis sagittis sit amet.',
+		url: '/images/kot_whale.png',
+		stack: [
+			{ icon: iconb.BiCheckShield, name: 'Sekurity' },
+			{ icon: iconb.BiGasPump, name: 'Stacking' },
+		],
+		linkProject: 'https://testnets.opensea.io/fr/collection/kotka',
+		linkGithub: 'https://testnets.opensea.io/fr/collection/kotka',
+	},
+	{
+		name: 'Feles Rocky',
+		description: 'Cras leo mauris, gravida vel lectus ac, congue luctus odio. Sed varius varius est eget convallis sagittis sit amet.',
+		url: '/images/kot_rock.png',
+		stack: [
+			{ icon: iconb.BiCheckShield, name: 'Sekurity' },
+			{ icon: iconb.BiGasPump, name: 'Stacking' },
+		],
+		linkProject: 'https://testnets.opensea.io/fr/collection/kotka',
+		linkGithub: 'https://testnets.opensea.io/fr/collection/kotka',
+	},
 
 ]
 

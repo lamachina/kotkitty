@@ -10,6 +10,7 @@ import ScrollToTop from '/src/components/elements/ScrollToTop'
 import '/src/App.css'
 import '/src/stylesheets/theme/theme.css'
 import { Typography } from '@mui/material'
+import Press from './components/sections/Press'
 
 
 
@@ -38,7 +39,9 @@ function App() {
 						<Work />
 						<Stack />
 					</>
-					: <Typography color={"red"} variant='overline'>Mobile website soon available...</Typography>
+					:
+					<Press />
+
 			}
 
 			<Contact />
