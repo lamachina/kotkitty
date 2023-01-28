@@ -37,13 +37,12 @@ function App() {
 				device === "pc" ?
 					<>
 						<Work />
-						<Stack />
 					</>
 					:
 					<Press />
 
 			}
-
+			<Stack />
 			<Contact />
 			<Footer />
 			<ScrollToTop />
