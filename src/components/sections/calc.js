@@ -1,40 +1,21 @@
-// In calc.js
-export function findMostOwnedTokens(users) {
-    // Create an object to keep track of the total amount owned for each token
-    const tokenAmounts = {};
-
-    // Loop through all the users and increment the amount owned for their token
-    users.forEach(user => {
-        const { token, amount } = user;
-        if (tokenAmounts[token]) {
-            tokenAmounts[token] += amount;
-        } else {
-            tokenAmounts[token] = amount;
-        }
-    });
-
-    // Sort the tokens by amount owned
-    const sortedTokens = Object.entries(tokenAmounts).sort((a, b) => b[1] - a[1]);
-
-    // Get the top 3 tokens
-    const top3Tokens = sortedTokens.slice(0, 3).map(entry => entry[0]);
-
-    return top3Tokens;
+export function getTopThreeTokens(pool) {
+    const sortedTokens = Object.entries(pool.tokenBets)
+        .sort(([, a], [, b]) => b.betAmount - a.betAmount);
+    return sortedTokens.slice(0, 3).map(([token]) => token);
 }
 
-export function getTotalAmountForTokens(users, tokens) {
-    // Filter the list of users to only include those with one of the given tokens
-    const filteredUsers = users.filter(user => tokens.includes(user.token));
 
-    // Sum the amounts for the filtered users
-    const totalAmount = filteredUsers.reduce((sum, user) => sum + user.amount, 0);
-
-    return totalAmount;
+export function getTotalTopThreeAmount(pool) {
+    const topThreeTokens = getTopThreeTokens(pool);
+    return topThreeTokens.reduce((total, token) => {
+        return total + pool.tokenBets[token].betAmount;
+    }, 0);
 }
+
 
 export function getTotalAmountForAllUsers(users) {
     // Sum the amounts for all users
-    const totalAmount = users.reduce((sum, user) => sum + user.amount, 0);
+    const totalAmount = users.reduce((sum, user) => sum + user.amount_bet, 0);
 
     return totalAmount;
 }
@@ -83,10 +64,12 @@ export function getLowestAmountUserForTop3Tokens(users, top3Tokens) {
     });
 }
 
+// XX.XX%
 export function getPercentWithDecimals(num1, num2) {
 
     return Math.round((num1 / num2) * 10000) / 100;
 }
+//
 export function getUnitFromPercent(num1, num2) {
 
     return Math.round((num1 / 100) * num2);
