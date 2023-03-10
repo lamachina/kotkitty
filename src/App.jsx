@@ -10,7 +10,7 @@ import ScrollToTop from '/src/components/elements/ScrollToTop'
 import '/src/App.css'
 import '/src/stylesheets/theme/theme.css'
 import { Typography } from '@mui/material'
-import Press from './components/sections/Press'
+import PrototypeVisu from './components/sections/PrototypeVisu'
 
 
 
@@ -33,7 +33,8 @@ function App() {
 		<div className='App' id='top' data-theme={theme}>
 			<Header />
 			<Home />
-			{
+			<PrototypeVisu />
+			{/* 	{
 				device === "pc" ?
 					<>
 						<Work />
@@ -41,7 +42,7 @@ function App() {
 					:
 					<Press />
 
-			}
+			} */}
 			<Stack />
 			<Contact />
 			<Footer />
