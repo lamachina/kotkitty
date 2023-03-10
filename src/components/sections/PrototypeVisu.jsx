@@ -2,7 +2,8 @@ import { Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
 import React from 'react';
 import {
     findMostOwnedTokens, getTotalAmountForTokens, getTotalAmountForAllUsers, getRatioTopThreeOnTotal,
-    getNumberOfUsersForToken, getTotalAmountForToken, getBiggestAmountUserForToken, getLowestAmountUserForTop3Tokens
+    getNumberOfUsersForToken, getTotalAmountForToken, getBiggestAmountUserForToken, getLowestAmountUserForTop3Tokens,
+    getPercentWithDecimals, getUnitFromPercent
 } from './calc';
 
 const tokenList = ['BTC', 'ETH', 'SOL', 'DOT', 'XRP', 'ATOM', 'BNB', 'INCH', 'AVAX', 'LDO', 'EGLD'];
@@ -37,20 +38,31 @@ function PrototypeVisu() {
     const TotalAmountForToken1 = getTotalAmountForToken(users, top3Tokens[1]);
     const TotalAmountForToken2 = getTotalAmountForToken(users, top3Tokens[2]);
 
+    //
+    const percentPerUserOnPoolBiggest = getPercentWithDecimals(biggestAmountUserforToken.amount, TotalAmountForToken0)
+    const percentPerUserOnPoolLowest = getPercentWithDecimals(lowestAmountUserForTop3Tokens.amount, TotalAmountForToken2)
+
+    const tokenTop1PercentTotal = getPercentWithDecimals(TotalAmountForToken0, totalAmountForTop3Tokens)
+    const tokenTop2PercentTotal = getPercentWithDecimals(TotalAmountForToken1, totalAmountForTop3Tokens)
+    const tokenTop3PercentTotal = getPercentWithDecimals(TotalAmountForToken2, totalAmountForTop3Tokens)
+
+    const tokenTop1FullyInvested = getUnitFromPercent(totalAmountForAllUsers, tokenTop1PercentTotal)
+    const tokenTop2FullyInvested = getUnitFromPercent(totalAmountForAllUsers, tokenTop2PercentTotal)
+    const tokenTop3FullyInvested = getUnitFromPercent(totalAmountForAllUsers, tokenTop3PercentTotal)
 
     return (
         <><Grid>
-            <Typography variant='h2'>List of Random Users</Typography>
+            <Typography variant='h2'>List of Degens</Typography>
             <Typography variant='body2'>The top 3 owned token is {top3Tokens[0] + ' ' + top3Tokens[1] + ' ' + top3Tokens[2]}</Typography>
             <Typography variant='body2'>The total pool for the top 3 is {totalAmountForTop3Tokens} $</Typography>
             <Typography variant='body2'>The total pool is {totalAmountForAllUsers} $</Typography>
-            <Typography variant='body2'>{ratioTopThreeOnTotal}% winners on the pool</Typography>
-            <Typography variant='body2'>{NumberOfUsersForToken0} users invested in {top3Tokens[0]} = {TotalAmountForToken0} $  </Typography>
-            <Typography variant='body2'>{NumberOfUsersForToken1} users invested in {top3Tokens[1]} = {TotalAmountForToken1} $  </Typography>
-            <Typography variant='body2'>{NumberOfUsersForToken2} users invested in {top3Tokens[2]} = {TotalAmountForToken2} $  </Typography>
+            <Typography variant='body2'>{ratioTopThreeOnTotal}% of $ is winners on the pool</Typography>
+            <Typography variant='body2'>{NumberOfUsersForToken0} users invested in {top3Tokens[0]} = {TotalAmountForToken0} $ || ({tokenTop1PercentTotal} %) = {tokenTop1FullyInvested} $  </Typography>
+            <Typography variant='body2'>{NumberOfUsersForToken1} users invested in {top3Tokens[1]} = {TotalAmountForToken1} $ || ({tokenTop2PercentTotal} %) = {tokenTop2FullyInvested} $ </Typography>
+            <Typography variant='body2'>{NumberOfUsersForToken2} users invested in {top3Tokens[2]} = {TotalAmountForToken2} $ || ({tokenTop3PercentTotal} %) = {tokenTop3FullyInvested} $ </Typography>
 
-            <Typography>The smartest user has: {biggestAmountUserforToken.amount} $ of {biggestAmountUserforToken.token} </Typography>
-            <Typography>The dumbest user has: {lowestAmountUserForTop3Tokens.amount} $ of {lowestAmountUserForTop3Tokens.token} </Typography>
+            <Typography>The biggest winning user has: {biggestAmountUserforToken.amount} $ of {biggestAmountUserforToken.token} ({percentPerUserOnPoolBiggest} %) </Typography>
+            <Typography>The smallest winning user has: {lowestAmountUserForTop3Tokens.amount} $ of {lowestAmountUserForTop3Tokens.token} ({percentPerUserOnPoolLowest} %) </Typography>
         </Grid>
 
             <TableContainer sx={{ flexWrap: 'wrap', display: 'flex' }}>

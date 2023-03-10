@@ -82,3 +82,12 @@ export function getLowestAmountUserForTop3Tokens(users, top3Tokens) {
         return prev.amount < current.amount ? prev : current;
     });
 }
+
+export function getPercentWithDecimals(num1, num2) {
+
+    return Math.round((num1 / num2) * 10000) / 100;
+}
+export function getUnitFromPercent(num1, num2) {
+
+    return Math.round((num1 / 100) * num2);
+}
