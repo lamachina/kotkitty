@@ -2,7 +2,7 @@ import { Grid, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableH
 import React from 'react';
 import {
     getTopThreeTokens, getTotalTopThreeAmount, getTotalAmountForAllUsers,
-    getPercentWithDecimals, getUnitFromPercent, getPercentTopPerTop3, getPoolTrade, getTokenStats
+    getPercentWithDecimals, getUnitFromPercent, getPercentTopPerTop3, getPoolTrade, getAvgEvmTopThree, getAvgEvm, getTopTokenBets
 } from './calc';
 
 const generateRandomData = () => {
@@ -51,53 +51,21 @@ function PrototypeVisu() {
 
     const poolTrades = getPoolTrade(totalAmountForAllUsers, percentTopPerTop3, tokenValues)
 
-    const TokenStats = getTokenStats(tokenValues)
+    const AvgEvmTopThree = getAvgEvmTopThree(InitialPool, tokenValues)
 
-    console.log(TokenStats);
-    //console.log(poolTradesWithFinalAmount);
-    /*     // Calculate the top 3 most owned tokens from the list of users
-        const top3Tokens = findMostOwnedTokens(users);
-    
-        // Calculate the total amount owned for the top 3 tokens
-        const totalAmountForTop3Tokens = getTotalAmountForTokens(users, top3Tokens);
-    
-        //Best and dumbest amount user top 1 and 3
-        const biggestAmountUserforToken = getBiggestAmountUserForToken(users, top3Tokens[0])
-        const lowestAmountUserForTop3Tokens = getLowestAmountUserForTop3Tokens(users, top3Tokens)
-    
-        
-    
-        // Calculate the total amount owned for all users
-        const ratioTopThreeOnTotal = getRatioTopThreeOnTotal(totalAmountForTop3Tokens, totalAmountForAllUsers);
-        // Calculate the total amount owned for all users
-        const NumberOfUsersForToken0 = getNumberOfUsersForToken(users, top3Tokens[0]);
-        const NumberOfUsersForToken1 = getNumberOfUsersForToken(users, top3Tokens[1]);
-        const NumberOfUsersForToken2 = getNumberOfUsersForToken(users, top3Tokens[2]);
-        // Calculate the total amount owned for all users
-        const TotalAmountForToken0 = getTotalAmountForToken(users, top3Tokens[0]);
-        const TotalAmountForToken1 = getTotalAmountForToken(users, top3Tokens[1]);
-        const TotalAmountForToken2 = getTotalAmountForToken(users, top3Tokens[2]);
-    
-        //
-        const percentPerUserOnPoolBiggest = getPercentWithDecimals(biggestAmountUserforToken.amount, TotalAmountForToken0)
-        const percentPerUserOnPoolLowest = getPercentWithDecimals(lowestAmountUserForTop3Tokens.amount, TotalAmountForToken2)
-    
-        const tokenTop1PercentTotal = getPercentWithDecimals(TotalAmountForToken0, totalAmountForTop3Tokens)
-        const tokenTop2PercentTotal = getPercentWithDecimals(TotalAmountForToken1, totalAmountForTop3Tokens)
-        const tokenTop3PercentTotal = getPercentWithDecimals(TotalAmountForToken2, totalAmountForTop3Tokens)
-    
-        const tokenTop1FullyInvested = getUnitFromPercent(totalAmountForAllUsers, tokenTop1PercentTotal)
-        const tokenTop2FullyInvested = getUnitFromPercent(totalAmountForAllUsers, tokenTop2PercentTotal)
-        const tokenTop3FullyInvested = getUnitFromPercent(totalAmountForAllUsers, tokenTop3PercentTotal) */
+    const AvgEvm = getAvgEvm(InitialPool, tokenValues)
+
+    const restOfTrade = poolTrades[0].finalValue + poolTrades[1].finalValue + poolTrades[2].finalValue
+
+    const TopTokenBets = getTopTokenBets(users, topThreeTokens, InitialPool)
+    console.log(TopTokenBets);
 
     return (
-        <>
-            <Grid display={'flex'} flexDirection={'row'} gap={'1rem'} alignItems='center' justifyContent={'space-around'}>
-                <Stack flexDirection={"column"}>
-                    <Typography variant='h2'>List of Tokens</Typography>
-                    <Typography variant='body2'>TOTAL POOL LIQUIDITY : {totalAmountForAllUsers} $</Typography>
-                </Stack>
-                <Stack flexDirection={"column"}>
+        <Grid >
+            <Grid display={'flex'} flexDirection={'column'} alignItems='left' justifyContent={'space-around'}>
+                <Typography variant='h2'>List of Tokens</Typography>
+                <Typography variant='body2'>TOTAL POOL LIQUIDITY : {totalAmountForAllUsers} $</Typography>
+                <Stack flexDirection={"column"} gap='0.3rem'>
                     <Typography variant='body1'>Choosen Tokens and amount repartition </Typography>
                     {Object.entries(percentTopPerTop3).map((token, index) => (
                         <Typography variant='body2' key={index}>
@@ -105,14 +73,15 @@ function PrototypeVisu() {
                         </Typography>
                     ))}
                 </Stack>
-
+                <Typography variant='body1'>Pool Trades (7d) generated {AvgEvmTopThree}% . The minority average generated is {AvgEvm}%</Typography>
+                <Typography variant='overline'>Pool {AvgEvmTopThree > 0 ? AvgEvmTopThree > AvgEvm * 2 ? '' : 'did not' : 'did not'} won</Typography>
+                <Typography variant='body1'>Rest : {Math.round(restOfTrade * 100) / 100} ( {Math.round((restOfTrade - totalAmountForAllUsers) * 100) / 100} )</Typography>
 
             </Grid>
-            <Grid>
-                <Typography variant='body1'>Pool Trades (7d)</Typography>
-                <TableContainer sx={{ flexWrap: 'wrap', display: 'flex', width: '50%' }}>
+            <Grid display={'flex'} flexDirection={'column'} alignItems='left' justifyContent={'space-around'}>
 
-                    <Table>
+                <TableContainer sx={{ display: 'flex' }}>
+                    <Table stickyHeader>
                         <TableHead sx={{ background: '#eeeeee' }}>
                             <TableRow>
                                 <TableCell>TOP 3</TableCell>
@@ -137,12 +106,12 @@ function PrototypeVisu() {
                 </TableContainer>
             </Grid>
 
-            <Grid display={'flex'} flexDirection={'row'} gap={'1rem'} alignItems='center' justifyContent={'center'}>
-                <TableContainer sx={{ flexWrap: 'wrap', display: 'flex', width: '50%' }}>
+            <Grid display={'flex'} flexDirection={'column'} gap={'1rem'} alignItems='center' justifyContent={'center'}>
+                <TableContainer sx={{ flexWrap: 'wrap', display: 'flex', height: '13rem', overflowY: 'initial' }}>
 
-                    <Table>
-                        <TableHead sx={{ background: '#eeeeee' }}>
-                            <TableRow>
+                    <Table stickyHeader>
+                        <TableHead sx={{ background: '#eeeeee' }} >
+                            <TableRow >
                                 <TableCell>Token</TableCell>
                                 <TableCell align="right">Total Amount</TableCell>
                                 <TableCell align="right">Voters</TableCell>
@@ -164,10 +133,10 @@ function PrototypeVisu() {
                         </TableBody>
                     </Table>
                 </TableContainer>
-                <TableContainer sx={{ flexWrap: 'wrap', display: 'flex', width: '40%' }}>
+                <TableContainer sx={{ flexWrap: 'wrap', display: 'flex', height: '13rem', overflowY: 'initial' }}>
 
-                    <Table>
-                        <TableHead sx={{ background: '#eeeeee' }}>
+                    <Table stickyHeader>
+                        <TableHead >
                             <TableRow>
                                 <TableCell>Token</TableCell>
                                 <TableCell align="right">Evolution (7d)</TableCell>
@@ -179,7 +148,7 @@ function PrototypeVisu() {
                                 .map(([token, percentEv], index) => (
                                     <TableRow
                                         key={token}
-                                        className={index < 3 ? "highlighted-row" : ""}
+                                        className={index < 3 ? "highlighted-roww" : ""}
                                     >
                                         <TableCell>{token}</TableCell>
                                         <TableCell align="right">{percentEv.percentEv} %</TableCell>
@@ -189,29 +158,58 @@ function PrototypeVisu() {
                     </Table>
 
                 </TableContainer>
-            </Grid><Typography variant='h2'>List of Degens</Typography><TableContainer sx={{ flexWrap: 'wrap', display: 'flex' }}>
+            </Grid>
+            <Grid>
+                <Typography variant='h2'>List of Winners Degens</Typography>
+                <TableContainer sx={{ flexWrap: 'wrap', display: 'flex', height: '13rem', overflowY: 'initial' }}>
 
-                <Table>
-                    <TableHead sx={{ background: '#eeeeee' }}>
-                        <TableRow>
-                            <TableCell>User</TableCell>
-                            <TableCell align="right">Token</TableCell>
-                            <TableCell align="right">Amount</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {users.sort((a, b) => b.amount_bet - a.amount_bet).map((user, index) => (
-                            <TableRow key={user.name}>
-                                <TableCell>{user.name}</TableCell>
-                                <TableCell align="right">{user.token_bet}</TableCell>
-                                <TableCell align="right">{user.amount_bet}</TableCell>
+                    <Table stickyHeader>
+                        <TableHead sx={{ background: '#eeeeee' }}>
+                            <TableRow>
+                                <TableCell>User</TableCell>
+                                <TableCell align="right">Token</TableCell>
+                                <TableCell align="right">Amount</TableCell>
+                                <TableCell align="right">Ratio</TableCell>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                        </TableHead>
+                        <TableBody>
+                            {TopTokenBets.sort((a, b) => b.ratio - a.ratio).map((degen, index) => (
+                                <TableRow key={degen.name}>
+                                    <TableCell>{degen.name}</TableCell>
+                                    <TableCell align="right">{degen.token}</TableCell>
+                                    <TableCell align="right">{degen.amount_bet}</TableCell>
+                                    <TableCell align="right">{degen.ratio}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
 
-            </TableContainer>
-        </>
+                </TableContainer>
+                <Typography variant='h2'>List of Degens</Typography>
+                <TableContainer sx={{ flexWrap: 'wrap', display: 'flex', height: '13rem', overflowY: 'initial' }}>
+
+                    <Table stickyHeader>
+                        <TableHead sx={{ background: '#eeeeee' }}>
+                            <TableRow>
+                                <TableCell>User</TableCell>
+                                <TableCell align="right">Token</TableCell>
+                                <TableCell align="right">Amount</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {users.sort((a, b) => b.amount_bet - a.amount_bet).map((user, index) => (
+                                <TableRow key={user.name}>
+                                    <TableCell>{user.name}</TableCell>
+                                    <TableCell align="right">{user.token_bet}</TableCell>
+                                    <TableCell align="right">{user.amount_bet}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+
+                </TableContainer>
+            </Grid>
+        </Grid>
 
     );
 }

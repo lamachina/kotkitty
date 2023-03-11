@@ -60,21 +60,46 @@ export function getPoolTrade(totalAmount, percentTOpPerTop3, tokenValues) {
 }
 
 
-export function getTokenStats(tokenValues) {
-    const tokens = Object.values(tokenValues);
-    const sortedTokens = tokens.sort((a, b) => b.percentEv - a.percentEv);
-
-    const topThreeTokens = sortedTokens.slice(0, 3);
-    const topThreeTokensSum = topThreeTokens.reduce((sum, token) => sum + token.percentEv, 0);
-
-    const avgEv = tokens.reduce((sum, token) => sum + token.percentEv, 0) / tokens.length;
-    const avgEvm = (tokens.reduce((sum, token) => sum + token.percentEv, 0) - topThreeTokensSum) / (tokens.length - 3);
-
-    return {
-        avgEv,
-        avgEvm,
-    };
+export function getAvgEvmTopThree(pool, tokenValues) {
+    const topThreeTokens = getTopThreeTokens(pool);
+    const topThreePercentEvs = topThreeTokens.map((token) => tokenValues[token].percentEv);
+    const sum = topThreePercentEvs.reduce((acc, percentEv) => acc + percentEv, 0);
+    return Math.round(sum / topThreePercentEvs.length * 100) / 100;
 }
+
+export function getAvgEvm(pool, tokenValues) {
+    const topThreeTokens = getTopThreeTokens(pool);
+    const tokens = Object.keys(tokenValues).filter(token => !topThreeTokens.includes(token));
+    const evmValues = tokens.map(token => tokenValues[token].percentEv);
+    const avgEvm = evmValues.reduce((sum, ev) => sum + ev, 0) / evmValues.length;
+
+    return Math.round(avgEvm * 100) / 100;
+}
+
+
+export function getTopTokenBets(users, topThreeTokens, InitialPool) {
+    const topTokenBets = [];
+
+    // Loop through each user in the users array
+    for (let user of users) {
+        // Check if the user's token_bet is one of the top three tokens
+        if (topThreeTokens.includes(user.token_bet)) {
+            // If so, add the user's name, token, and amount_bet to the topTokenBets array
+            const betAmount = InitialPool.tokenBets[user.token_bet]?.betAmount ?? 0;
+            const ratio = betAmount > 0 ? user.amount_bet / betAmount : 0;
+            topTokenBets.push({
+                name: user.name,
+                token: user.token_bet,
+                amount_bet: user.amount_bet,
+                ratio: Math.round(ratio * 10000) / 100,
+            });
+        }
+    }
+
+    return topTokenBets;
+}
+
+
 
 
 
