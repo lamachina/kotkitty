@@ -1,8 +1,8 @@
-import { Grid, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Grid, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import React from 'react';
 import {
     getTopThreeTokens, getTotalTopThreeAmount, getTotalAmountForAllUsers,
-    getPercentWithDecimals, getUnitFromPercent
+    getPercentWithDecimals, getUnitFromPercent, getPercentTopPerTop3, getPoolTrade, getTokenStats
 } from './calc';
 
 const generateRandomData = () => {
@@ -46,7 +46,15 @@ function PrototypeVisu() {
     // Calculate the total amount owned for all users
     const totalAmountForAllUsers = getTotalAmountForAllUsers(users);
 
-    console.log(tokenValues);
+    //Object coin top /top 3 Amount
+    const percentTopPerTop3 = getPercentTopPerTop3(InitialPool)
+
+    const poolTrades = getPoolTrade(totalAmountForAllUsers, percentTopPerTop3, tokenValues)
+
+    const TokenStats = getTokenStats(tokenValues)
+
+    console.log(TokenStats);
+    //console.log(poolTradesWithFinalAmount);
     /*     // Calculate the top 3 most owned tokens from the list of users
         const top3Tokens = findMostOwnedTokens(users);
     
@@ -83,23 +91,54 @@ function PrototypeVisu() {
         const tokenTop3FullyInvested = getUnitFromPercent(totalAmountForAllUsers, tokenTop3PercentTotal) */
 
     return (
-        <><Grid>
-            <Typography variant='h2'>List of Tokens</Typography>
-            <Typography variant='body2'>TOTAL POOL LIQUIDITY : {totalAmountForAllUsers} $</Typography>
+        <>
+            <Grid display={'flex'} flexDirection={'row'} gap={'1rem'} alignItems='center' justifyContent={'space-around'}>
+                <Stack flexDirection={"column"}>
+                    <Typography variant='h2'>List of Tokens</Typography>
+                    <Typography variant='body2'>TOTAL POOL LIQUIDITY : {totalAmountForAllUsers} $</Typography>
+                </Stack>
+                <Stack flexDirection={"column"}>
+                    <Typography variant='body1'>Choosen Tokens and amount repartition </Typography>
+                    {Object.entries(percentTopPerTop3).map((token, index) => (
+                        <Typography variant='body2' key={index}>
+                            {token[0]} with {token[1]}%
+                        </Typography>
+                    ))}
+                </Stack>
 
-            <Stack flexDirection={"row"} gap='0.5rem'>
-                <Typography variant='body2'>MAJORITY VOTE : </Typography>
-                {topThreeTokens.map((token, index) => (
-                    <Typography variant='body2' key={index}>
-                        {token}
-                    </Typography>
-                ))}
-            </Stack>
 
+            </Grid>
+            <Grid>
+                <Typography variant='body1'>Pool Trades (7d)</Typography>
+                <TableContainer sx={{ flexWrap: 'wrap', display: 'flex', width: '50%' }}>
 
-        </Grid>
-            <Grid display={'flex'} flexDirection='row' gap={'1rem'} alignItems='center' justifyContent={'center'}>
-                <TableContainer sx={{ flexWrap: 'wrap', display: 'flex', width: '40%' }}>
+                    <Table>
+                        <TableHead sx={{ background: '#eeeeee' }}>
+                            <TableRow>
+                                <TableCell>TOP 3</TableCell>
+                                <TableCell align="right">Pool amount</TableCell>
+                                <TableCell align="right">After 7d</TableCell>
+                                <TableCell align="right">Pool PnL</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {poolTrades.map((trade, index) => (
+                                <TableRow
+                                    key={trade}
+                                >
+                                    <TableCell>{trade.tokenName}</TableCell>
+                                    <TableCell align="right">{trade.newAmount}</TableCell>
+                                    <TableCell align="right">{trade.finalValue}</TableCell>
+                                    <TableCell align="right">{trade.net_pnl}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Grid>
+
+            <Grid display={'flex'} flexDirection={'row'} gap={'1rem'} alignItems='center' justifyContent={'center'}>
+                <TableContainer sx={{ flexWrap: 'wrap', display: 'flex', width: '50%' }}>
 
                     <Table>
                         <TableHead sx={{ background: '#eeeeee' }}>
@@ -113,7 +152,10 @@ function PrototypeVisu() {
                             {Object.entries(InitialPool.tokenBets)
                                 .sort((a, b) => b[1].betAmount - a[1].betAmount)
                                 .map(([token, pool], index) => (
-                                    <TableRow key={token}>
+                                    <TableRow
+                                        key={token}
+                                        className={index < 3 ? "highlighted-row" : ""}
+                                    >
                                         <TableCell>{token}</TableCell>
                                         <TableCell align="right">{pool.betAmount}</TableCell>
                                         <TableCell align="right">{pool.betCount}</TableCell>
@@ -128,26 +170,26 @@ function PrototypeVisu() {
                         <TableHead sx={{ background: '#eeeeee' }}>
                             <TableRow>
                                 <TableCell>Token</TableCell>
-                                <TableCell align="right">Total Amount</TableCell>
+                                <TableCell align="right">Evolution (7d)</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {Object.entries(tokenValues)
                                 .sort((a, b) => b[1].percentEv - a[1].percentEv)
                                 .map(([token, percentEv], index) => (
-                                    <TableRow key={token}>
+                                    <TableRow
+                                        key={token}
+                                        className={index < 3 ? "highlighted-row" : ""}
+                                    >
                                         <TableCell>{token}</TableCell>
-                                        <TableCell align="right">{percentEv.percentEv}</TableCell>
+                                        <TableCell align="right">{percentEv.percentEv} %</TableCell>
                                     </TableRow>
                                 ))}
                         </TableBody>
                     </Table>
 
                 </TableContainer>
-            </Grid>
-            <Typography variant='h2'>List of Degens</Typography>
-
-            <TableContainer sx={{ flexWrap: 'wrap', display: 'flex' }}>
+            </Grid><Typography variant='h2'>List of Degens</Typography><TableContainer sx={{ flexWrap: 'wrap', display: 'flex' }}>
 
                 <Table>
                     <TableHead sx={{ background: '#eeeeee' }}>
@@ -168,7 +210,9 @@ function PrototypeVisu() {
                     </TableBody>
                 </Table>
 
-            </TableContainer></>
+            </TableContainer>
+        </>
+
     );
 }
 

@@ -111,3 +111,7 @@ img {
 .mansoryimg:hover {
 	filter: grayscale(0) brightness(1);
 }
+
+.highlighted-row {
+	background-color: rgb(147, 170, 190);
+}

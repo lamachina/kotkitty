@@ -20,6 +20,65 @@ export function getTotalAmountForAllUsers(users) {
     return totalAmount;
 }
 
+export function getPercentTopPerTop3(pool) {
+    const topThreeTokens = getTopThreeTokens(pool);
+    const totalTopThreeAmount = getTotalTopThreeAmount(pool);
+
+    const result = {};
+
+    for (let i = 0; i < topThreeTokens.length; i++) {
+        const token = topThreeTokens[i];
+        const percent = getPercentWithDecimals(pool.tokenBets[token].betAmount, totalTopThreeAmount);
+        result[token] = percent;
+    }
+
+    return result;
+}
+
+
+export function getPoolTrade(totalAmount, percentTOpPerTop3, tokenValues) {
+    const tokenNames = Object.keys(percentTOpPerTop3);
+    const poolTrades = [];
+
+    for (let i = 0; i < tokenNames.length; i++) {
+        const tokenName = tokenNames[i];
+        const percentOp = percentTOpPerTop3[tokenName];
+        const tokenValue = tokenValues[tokenName];
+        const newAmount = totalAmount * (percentOp / 100);
+        const finalValue = newAmount + (newAmount / 100 * tokenValue.percentEv);
+        const difference = finalValue - newAmount
+
+        poolTrades.push({
+            tokenName: tokenName,
+            newAmount: Math.round(newAmount * 100) / 100,
+            finalValue: Math.round(finalValue * 100) / 100,
+            net_pnl: Math.round(difference * 100) / 100,
+        });
+    }
+
+    return poolTrades;
+}
+
+
+export function getTokenStats(tokenValues) {
+    const tokens = Object.values(tokenValues);
+    const sortedTokens = tokens.sort((a, b) => b.percentEv - a.percentEv);
+
+    const topThreeTokens = sortedTokens.slice(0, 3);
+    const topThreeTokensSum = topThreeTokens.reduce((sum, token) => sum + token.percentEv, 0);
+
+    const avgEv = tokens.reduce((sum, token) => sum + token.percentEv, 0) / tokens.length;
+    const avgEvm = (tokens.reduce((sum, token) => sum + token.percentEv, 0) - topThreeTokensSum) / (tokens.length - 3);
+
+    return {
+        avgEv,
+        avgEvm,
+    };
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
 export function getRatioTopThreeOnTotal(totalAmountForTop3Tokens, totalAmountForAllUsers) {
     // Sum the amounts for all users
 
