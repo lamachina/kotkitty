@@ -70,15 +70,19 @@ export function getAvgEvmTopThree(pool, tokenValues) {
 export function getAvgEvm(pool, tokenValues) {
     const topThreeTokens = getTopThreeTokens(pool);
     const tokens = Object.keys(tokenValues).filter(token => !topThreeTokens.includes(token));
-    const evmValues = tokens.map(token => tokenValues[token].percentEv);
+    const sortedTokens = tokens.sort((a, b) => tokenValues[b].percentEv - tokenValues[a].percentEv);
+    const topTwelveTokens = sortedTokens.slice(0, 9);
+    const evmValues = topTwelveTokens.map(token => tokenValues[token].percentEv);
     const avgEvm = evmValues.reduce((sum, ev) => sum + ev, 0) / evmValues.length;
 
     return Math.round(avgEvm * 100) / 100;
 }
 
 
-export function getTopTokenBets(users, topThreeTokens, InitialPool) {
+
+export function getTopTokenBets(users, topThreeTokens, InitialPool, poolTrades) {
     const topTokenBets = [];
+
 
     // Loop through each user in the users array
     for (let user of users) {
@@ -87,17 +91,115 @@ export function getTopTokenBets(users, topThreeTokens, InitialPool) {
             // If so, add the user's name, token, and amount_bet to the topTokenBets array
             const betAmount = InitialPool.tokenBets[user.token_bet]?.betAmount ?? 0;
             const ratio = betAmount > 0 ? user.amount_bet / betAmount : 0;
+            const benef = ratio > 0 ? ratio * (poolTrades.find((trade) => trade.tokenName === user.token_bet)?.finalValue / 2) : 0;
+
+
+            // Get the two tokens that are different from the user's token_bet
+            const otherTokens = Object.keys(poolTrades[0].tokenName)
+                .filter(token => token !== user.token_bet);
+
+            // Calculate the benefSec
+            const benefSec = otherTokens.reduce((sum, token) => {
+                const trade = poolTrades.find((trade) => trade.tokenName === token);
+                return sum + (trade?.finalValue ?? 0) / 2;
+            }, 0);
+
             topTokenBets.push({
                 name: user.name,
                 token: user.token_bet,
                 amount_bet: user.amount_bet,
                 ratio: Math.round(ratio * 10000) / 100,
+                benef: Math.round(benef * 100) / 100,
+                benefSecond: Math.round(benefSec * 100) / 100
             });
         }
     }
 
     return topTokenBets;
 }
+
+/* export function getOtherTokenData(users, InitialPool, poolTrades, topThreeTokens) {
+    const otherTokenData = [];
+
+    for (let token of Object.keys(InitialPool.tokenBets)) {
+        if (token !== users.token_bet && topThreeTokens.includes(token)) {
+            const betCount = InitialPool.tokenBets[token].betCount;
+            const finalValue = poolTrades.find((trade) => trade.tokenName === token)?.finalValue;
+            const equityprop = finalValue / 2 / betCount
+
+            otherTokenData.push({
+                token: token,
+                betCount: betCount,
+                finalValue: equityprop
+            });
+        }
+    }
+
+    return otherTokenData;
+} */
+
+export function getOtherTokenData(TopTokenBets, InitialPool, poolTrades, topThreeTokens) {
+    const otherTokenData = [];
+
+    // Get an array of the other two tokens
+    const otherTokens = Object.keys(InitialPool.tokenBets).filter(token => token !== TopTokenBets.token && topThreeTokens.includes(token)).slice(0, 2);
+
+    // Calculate the sum of betCount of the other two tokens
+    const otherBetCountSum = otherTokens.reduce((sum, token) => sum + InitialPool.tokenBets[token].betCount, 0);
+
+    for (let token of otherTokens) {
+        const betCount = InitialPool.tokenBets[token].betCount;
+        const finalValue = poolTrades.find((trade) => trade.tokenName === token)?.finalValue;
+        const equityprop = finalValue / 2 / otherBetCountSum;
+
+        otherTokenData.push({
+            token: token,
+            betCount: betCount,
+            finalValue: finalValue,
+            equityprop: equityprop
+        });
+    }
+
+    return otherTokenData;
+}
+
+
+
+
+export function getNumNonVoters(topTokenBets, InitialPool, token) {
+    // Find the index of the pool that matches the given token
+    const poolIndex = InitialPool.findIndex((pool) => pool.token === token);
+
+    if (poolIndex === -1) {
+        // The given token wasn't found in the InitialPool, so return null
+        return null;
+    }
+
+    // Get the betCount for the given token from the InitialPool
+    const tokenBetCount = InitialPool[poolIndex].betCount;
+
+    // Create a Set of the voters who bet on the given token
+    const tokenVoters = new Set(topTokenBets.filter((bet) => bet.token === token).map((bet) => bet.name));
+
+    // Calculate the number of voters who did not bet on the given token
+    const nonVotersCount = InitialPool.reduce((sum, pool, i) => {
+        // Ignore the pool for the given token
+        if (i === poolIndex) {
+            return sum;
+        }
+
+        // Add the betCount for pools that aren't the given token and whose voters did not bet on the given token
+        const voters = new Set(Object.keys(pool.voters));
+        if (![...voters].some((voter) => tokenVoters.has(voter))) {
+            sum += pool.betCount;
+        }
+
+        return sum;
+    }, 0);
+
+    return nonVotersCount;
+}
+
 
 
 
