@@ -71,7 +71,7 @@ export function getAvgEvm(pool, tokenValues) {
     const topThreeTokens = getTopThreeTokens(pool);
     const tokens = Object.keys(tokenValues).filter(token => !topThreeTokens.includes(token));
     const sortedTokens = tokens.sort((a, b) => tokenValues[b].percentEv - tokenValues[a].percentEv);
-    const topTwelveTokens = sortedTokens.slice(0, 9);
+    const topTwelveTokens = sortedTokens.slice(0, 12);
     const evmValues = topTwelveTokens.map(token => tokenValues[token].percentEv);
     const avgEvm = evmValues.reduce((sum, ev) => sum + ev, 0) / evmValues.length;
 
@@ -141,23 +141,21 @@ export function getTopTokenBets(users, topThreeTokens, InitialPool, poolTrades) 
 export function getOtherTokenData(TopTokenBets, InitialPool, poolTrades, topThreeTokens) {
     const otherTokenData = [];
 
-    // Get an array of the other two tokens
-    const otherTokens = Object.keys(InitialPool.tokenBets).filter(token => token !== TopTokenBets.token && topThreeTokens.includes(token)).slice(0, 2);
+    for (let i = 0; i < TopTokenBets.length; i++) {
+        const token = TopTokenBets[i].token;
 
-    // Calculate the sum of betCount of the other two tokens
-    const otherBetCountSum = otherTokens.reduce((sum, token) => sum + InitialPool.tokenBets[token].betCount, 0);
-
-    for (let token of otherTokens) {
-        const betCount = InitialPool.tokenBets[token].betCount;
+        // Get an array of the other two tokens
+        const otherTokens = topThreeTokens.filter(t => t !== token);
+        console.log('otherTokens' + otherTokens);
+        // Calculate the sum of betCount of the other two tokens
+        const otherBetCountSum = otherTokens.reduce((sum, t) => sum + InitialPool.tokenBets[t].betCount, 0);
+        console.log('otherBetCountSum' + otherBetCountSum);
         const finalValue = poolTrades.find((trade) => trade.tokenName === token)?.finalValue;
-        const equityprop = finalValue / 2 / otherBetCountSum;
+        console.log('finalValue' + finalValue);
+        const equityprop = Math.round((finalValue / 2 / otherBetCountSum) * 100) / 100
+        console.log('equityprop' + equityprop);
 
-        otherTokenData.push({
-            token: token,
-            betCount: betCount,
-            finalValue: finalValue,
-            equityprop: equityprop
-        });
+        otherTokenData.push(equityprop);
     }
 
     return otherTokenData;
@@ -166,39 +164,7 @@ export function getOtherTokenData(TopTokenBets, InitialPool, poolTrades, topThre
 
 
 
-export function getNumNonVoters(topTokenBets, InitialPool, token) {
-    // Find the index of the pool that matches the given token
-    const poolIndex = InitialPool.findIndex((pool) => pool.token === token);
 
-    if (poolIndex === -1) {
-        // The given token wasn't found in the InitialPool, so return null
-        return null;
-    }
-
-    // Get the betCount for the given token from the InitialPool
-    const tokenBetCount = InitialPool[poolIndex].betCount;
-
-    // Create a Set of the voters who bet on the given token
-    const tokenVoters = new Set(topTokenBets.filter((bet) => bet.token === token).map((bet) => bet.name));
-
-    // Calculate the number of voters who did not bet on the given token
-    const nonVotersCount = InitialPool.reduce((sum, pool, i) => {
-        // Ignore the pool for the given token
-        if (i === poolIndex) {
-            return sum;
-        }
-
-        // Add the betCount for pools that aren't the given token and whose voters did not bet on the given token
-        const voters = new Set(Object.keys(pool.voters));
-        if (![...voters].some((voter) => tokenVoters.has(voter))) {
-            sum += pool.betCount;
-        }
-
-        return sum;
-    }, 0);
-
-    return nonVotersCount;
-}
 
 
 

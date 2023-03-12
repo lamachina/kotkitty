@@ -2,7 +2,7 @@ import { Grid, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableH
 import React from 'react';
 import {
     getTopThreeTokens, getTotalTopThreeAmount, getTotalAmountForAllUsers,
-    getPercentWithDecimals, getUnitFromPercent, getPercentTopPerTop3, getPoolTrade, getAvgEvmTopThree, getAvgEvm, getTopTokenBets, getNumNonVoters, getOtherTokenData
+    getPercentWithDecimals, getUnitFromPercent, getPercentTopPerTop3, getPoolTrade, getAvgEvmTopThree, getAvgEvm, getTopTokenBets, getOtherTokenData
 } from './calc';
 
 const generateRandomData = () => {
@@ -174,22 +174,23 @@ function PrototypeVisu() {
                         <TableHead sx={{ background: '#eeeeee' }}>
                             <TableRow>
                                 <TableCell>User</TableCell>
-                                <TableCell align="right">Token</TableCell>
                                 <TableCell align="right">Amount</TableCell>
-                                <TableCell align="right">Ratio</TableCell>
                                 <TableCell align="right">Primary</TableCell>
                                 <TableCell align="right">Secondary</TableCell>
+                                <TableCell align="right">Token</TableCell>
+                                <TableCell align="right">% in Pool</TableCell>
+
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {TopTokenBets.sort((a, b) => b.ratio - a.ratio).map((degen, index) => (
+                            {TopTokenBets.map((degen, index) => (
                                 <TableRow key={degen.name}>
                                     <TableCell>{degen.name}</TableCell>
-                                    <TableCell align="right">{degen.token}</TableCell>
                                     <TableCell align="right">{degen.amount_bet}</TableCell>
-                                    <TableCell align="right">{degen.ratio}</TableCell>
                                     <TableCell align="right">{degen.benef}</TableCell>
-                                    <TableCell align="right">{Math.round(OtherTokenData[0].equityprop + OtherTokenData[1].equityprop * 100) / 100}</TableCell>
+                                    <TableCell align="right">{OtherTokenData[index]}</TableCell>
+                                    <TableCell align="right">{degen.token}</TableCell>
+                                    <TableCell align="right">{degen.ratio}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
